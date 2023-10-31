@@ -23,7 +23,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
 
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
@@ -38,6 +37,21 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let red = tuple.0.try_into().map_err(|err| {
+            IntoColorError::IntConversion
+        })?;
+        let green = tuple.1.try_into().map_err(|err| {
+            IntoColorError::IntConversion
+        })?;
+        let blue = tuple.2.try_into().map_err(|err| {
+            IntoColorError::IntConversion
+        })?;
+
+        Ok(Color {
+            red,
+            green,
+            blue,
+        })
     }
 }
 
@@ -45,6 +59,23 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let colors: Vec<u8> = arr.iter().map(|&num| {
+            if num > 256 {
+                Err(IntoColorError::IntConversion)
+            } else {
+                num.try_into().map_err(|_err| {
+                    IntoColorError::IntConversion
+                })
+            }
+        }).collect::<Result<Vec<u8>, IntoColorError>>()?;
+
+
+
+        Ok(Color {
+            red: colors[0],
+            green: colors[1],
+            blue: colors[2]
+        })
     }
 }
 
@@ -52,6 +83,25 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen)
+        } else {
+            let colors: Vec<u8> = slice.iter().map(|&num| {
+                if num > 256 {
+                    Err(IntoColorError::IntConversion)
+                } else {
+                    num.try_into().map_err(|_err| {
+                        IntoColorError::IntConversion
+                    })
+                }
+            }).collect::<Result<Vec<u8>, IntoColorError>>()?;
+
+            Ok(Color {
+                red: colors[0],
+                green: colors[1],
+                blue: colors[2],
+            }) 
+        }
     }
 }
 
